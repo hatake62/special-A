@@ -1,0 +1,17 @@
+def risky(n):
+    if n == 0:
+        raise 99
+    return 100 / n
+
+def wrapper(n):
+    return risky(n)
+
+try:
+    print(wrapper(0))
+except:
+    print(777)
+
+try:
+    print(wrapper(5))
+except:
+    print(888)

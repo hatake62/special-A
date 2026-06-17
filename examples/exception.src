@@ -1,0 +1,7 @@
+def fail():
+    raise 1
+
+try:
+    print(fail())
+except:
+    print(999)

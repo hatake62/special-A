@@ -1,5 +1,8 @@
+import io
+
 import pytest
 
+import main
 from src import BaseVM, VM, VMError, run_src
 
 
@@ -67,3 +70,23 @@ def test_uncaught_exception_raises_vm_error():
 def test_base_vm_does_not_support_raise_instruction():
     with pytest.raises(ValueError):
         run_src("raise 1", BaseVM)
+
+
+def test_main_runs_source_file(tmp_path, capsys):
+    source = tmp_path / "program.src"
+    source.write_text("print(123)\n", encoding="utf-8")
+
+    assert main.main([str(source)]) == 0
+    assert capsys.readouterr().out.strip() == "123"
+
+
+def test_main_reads_source_from_stdin(monkeypatch, capsys):
+    monkeypatch.setattr("sys.stdin", io.StringIO("print(456)\n"))
+
+    assert main.main(["-"]) == 0
+    assert capsys.readouterr().out.strip() == "456"
+
+
+def test_main_returns_error_status_for_missing_file(capsys):
+    assert main.main(["missing.src"]) == 1
+    assert "error:" in capsys.readouterr().err

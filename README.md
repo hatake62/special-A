@@ -33,3 +33,30 @@ python -m pip install -r requirements.txt
 ruby -e 'require "prism"; puts Prism::VERSION'
 python --version
 ```
+
+## Run
+
+Demo:
+
+```sh
+python main.py
+```
+
+Production/source file:
+
+```sh
+python main.py path/to/program.src
+```
+
+Standard input:
+
+```sh
+python main.py - < path/to/program.src
+```
+
+By default, `main.py` uses the extended VM with `raise`/`except` support. To run
+with the base VM:
+
+```sh
+python main.py --base-vm path/to/program.src
+```

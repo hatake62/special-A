@@ -1,6 +1,7 @@
 import argparse
 import contextlib
 import io
+import json
 import sys
 import time
 from pathlib import Path
@@ -21,59 +22,42 @@ CASES = {
 }
 
 
-def run_case(case_name, optimize=False):
+def non_negative_float(value):
+    seconds = float(value)
+    if seconds < 0:
+        raise argparse.ArgumentTypeError("--seconds must be greater than or equal to 0")
+    return seconds
+
+
+def run_case(case_name, optimize=False, seconds=None):
     case = CASES[case_name]
     functions = build(case["src"], optimize=optimize)
-    vm = case["vm_class"](functions)
-    stdout = io.StringIO()
+    total_instruction_count = 0
+    result = None
 
     start = time.perf_counter()
-    with contextlib.redirect_stdout(stdout):
-        result = vm.run()
-    elapsed = time.perf_counter() - start
+    while True:
+        vm = case["vm_class"](functions)
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            result = vm.run()
+        total_instruction_count += vm.instruction_count
+
+        elapsed = time.perf_counter() - start
+        if seconds is None or elapsed >= seconds:
+            break
 
     return {
         "case": case_name,
-        "label": case["label"],
         "optimize": optimize,
-        "elapsed": elapsed,
-        "instruction_count": vm.instruction_count,
-        "stdout": stdout.getvalue(),
+        "elapsed_sec": elapsed,
+        "instruction_count": total_instruction_count,
         "result": result,
     }
 
 
-def format_output_value(run):
-    stdout = run["stdout"].strip()
-    if stdout:
-        return stdout
-    return repr(run["result"])
-
-
-def print_run(run):
-    print(f"case: {run['case']} ({run['label']})")
-    print(f"optimize: {'on' if run['optimize'] else 'off'}")
-    print(f"elapsed: {run['elapsed']:.6f}s")
-    print(f"instruction_count: {run['instruction_count']}")
-    print(f"output: {format_output_value(run)}")
-
-
-def print_comparison(no_opt, opt):
-    no_opt_output = format_output_value(no_opt)
-    opt_output = format_output_value(opt)
-    same_output = no_opt_output == opt_output
-
-    print("== comparison ==")
-    print(f"case: {no_opt['case']} ({no_opt['label']})")
-    print(f"output_match: {'yes' if same_output else 'no'}")
-    print(f"no_opt_output: {no_opt_output}")
-    print(f"opt_output: {opt_output}")
-    print(f"no_opt_instruction_count: {no_opt['instruction_count']}")
-    print(f"opt_instruction_count: {opt['instruction_count']}")
-    print(
-        "instruction_delta: "
-        f"{opt['instruction_count'] - no_opt['instruction_count']}"
-    )
+def print_json(payload):
+    print(json.dumps(payload, ensure_ascii=False))
 
 
 def parse_args(argv=None):
@@ -91,6 +75,11 @@ def parse_args(argv=None):
         help="定数畳み込み最適化を有効にする",
     )
     parser.add_argument(
+        "--seconds",
+        type=non_negative_float,
+        help="指定した秒数以上、同じベンチマークを繰り返し実行する",
+    )
+    parser.add_argument(
         "--compare",
         action="store_true",
         help="最適化なし/ありを続けて実行し、出力結果の一致を表示する",
@@ -102,16 +91,20 @@ def main(argv=None):
     args = parse_args(argv)
 
     if args.compare:
-        no_opt = run_case(args.case, optimize=False)
-        opt = run_case(args.case, optimize=True)
-        print_run(no_opt)
-        print()
-        print_run(opt)
-        print()
-        print_comparison(no_opt, opt)
-        return 0 if format_output_value(no_opt) == format_output_value(opt) else 1
+        no_opt = run_case(args.case, optimize=False, seconds=args.seconds)
+        opt = run_case(args.case, optimize=True, seconds=args.seconds)
+        result_match = no_opt["result"] == opt["result"]
+        print_json(
+            {
+                "case": args.case,
+                "result_match": result_match,
+                "no_opt": no_opt,
+                "opt": opt,
+            }
+        )
+        return 0 if result_match else 1
 
-    print_run(run_case(args.case, optimize=args.opt))
+    print_json(run_case(args.case, optimize=args.opt, seconds=args.seconds))
     return 0
 
 

@@ -31,6 +31,17 @@ while i < 10:
     assert run_src(src, VM) == 0
 
 
+def test_array_literal_and_index_access(capsys):
+    src = """
+arr = [1, 2, 3]
+print(arr[0])
+print(arr[1])
+print(arr[2])
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip().splitlines() == ["1", "2", "3"]
+
+
 def test_exception_is_caught(capsys):
     src = """
 def fail():

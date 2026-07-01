@@ -44,6 +44,12 @@ class PythonToAst:
         if isinstance(node, ast.Name):
             return ["var", node.id]
 
+        if isinstance(node, ast.List):
+            return ["array", [self.convert(element) for element in node.elts]]
+
+        if isinstance(node, ast.Subscript):
+            return self.convert_subscript(node)
+
         if isinstance(node, ast.Assign):
             return self.convert_assign(node)
 
@@ -94,6 +100,11 @@ class PythonToAst:
         if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
             raise ValueError("代入先は通常の変数だけ対応しています")
         return ["assign", node.targets[0].id, self.convert(node.value)]
+
+    def convert_subscript(self, node):
+        if isinstance(node.slice, ast.Slice):
+            raise ValueError("スライスは未対応です")
+        return ["index", self.convert(node.value), self.convert(node.slice)]
 
     def convert_try(self, node):
         if node.orelse or node.finalbody:

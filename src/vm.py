@@ -32,6 +32,10 @@ class BaseVM:
                     self.stack.pop()
             elif op in ("add", "sub", "mul", "div", "lt", "gt", "eq"):
                 self.execute_binary_op(op)
+            elif op == "build_array":
+                self.execute_build_array(instr[1])
+            elif op == "get_index":
+                self.execute_get_index()
             elif op == "get_local":
                 self.stack.append(frame.locals[instr[1]])
             elif op == "set_local":
@@ -67,6 +71,19 @@ class BaseVM:
             self.stack.append(1 if a > b else 0)
         elif op == "eq":
             self.stack.append(1 if a == b else 0)
+
+    def execute_build_array(self, count):
+        if count:
+            values = self.stack[-count:]
+            del self.stack[-count:]
+        else:
+            values = []
+        self.stack.append(values)
+
+    def execute_get_index(self):
+        index = self.stack.pop()
+        array = self.stack.pop()
+        self.stack.append(array[index])
 
     def handle_unknown_instruction(self, instr):
         raise ValueError(f"未知の命令: {instr}")

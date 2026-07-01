@@ -25,6 +25,11 @@ class Compiler:
             self.stack_depth -= 1
         elif op in ("add", "sub", "mul", "div", "lt", "gt", "eq"):
             self.stack_depth -= 1
+        elif op == "build_array":
+            self.stack_depth -= instr[1]
+            self.stack_depth += 1
+        elif op == "get_index":
+            self.stack_depth -= 1
         elif op == "set_local":
             pass
         elif op == "call":
@@ -47,6 +52,15 @@ class Compiler:
             self.compile_expr(node[1])
             self.compile_expr(node[2])
             self.emit(tag)
+        elif tag == "array":
+            _, elements = node
+            for element in elements:
+                self.compile_expr(element)
+            self.emit("build_array", len(elements))
+        elif tag == "index":
+            self.compile_expr(node[1])
+            self.compile_expr(node[2])
+            self.emit("get_index")
         elif tag == "call":
             _, name, args = node
             for arg in args:

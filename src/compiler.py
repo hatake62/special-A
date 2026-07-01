@@ -30,6 +30,8 @@ class Compiler:
             self.stack_depth += 1
         elif op == "get_index":
             self.stack_depth -= 1
+        elif op == "set_index":
+            self.stack_depth -= 2
         elif op == "set_local":
             pass
         elif op == "call":
@@ -75,6 +77,11 @@ class Compiler:
         if tag == "assign":
             self.compile_expr(node[2])
             self.emit("set_local", self.local_index(node[1]))
+        elif tag == "set_index":
+            self.compile_expr(node[1])
+            self.compile_expr(node[2])
+            self.compile_expr(node[3])
+            self.emit("set_index")
         elif tag == "return":
             self.compile_expr(node[1])
             self.emit("ret")

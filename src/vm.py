@@ -36,6 +36,8 @@ class BaseVM:
                 self.execute_build_array(instr[1])
             elif op == "get_index":
                 self.execute_get_index()
+            elif op == "set_index":
+                self.execute_set_index()
             elif op == "get_local":
                 self.stack.append(frame.locals[instr[1]])
             elif op == "set_local":
@@ -84,6 +86,13 @@ class BaseVM:
         index = self.stack.pop()
         array = self.stack.pop()
         self.stack.append(array[index])
+
+    def execute_set_index(self):
+        value = self.stack.pop()
+        index = self.stack.pop()
+        array = self.stack.pop()
+        array[index] = value
+        self.stack.append(value)
 
     def handle_unknown_instruction(self, instr):
         raise ValueError(f"未知の命令: {instr}")

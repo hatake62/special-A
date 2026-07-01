@@ -63,6 +63,16 @@ print(len(arr))
     assert capsys.readouterr().out.strip() == "4"
 
 
+def test_array_index_assignment(capsys):
+    src = """
+arr = [1, 2, 3]
+arr[1] = 99
+print(arr[1])
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "99"
+
+
 def test_exception_is_caught(capsys):
     src = """
 def fail():

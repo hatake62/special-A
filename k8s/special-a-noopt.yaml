@@ -15,7 +15,7 @@ spec:
         - bench/run_case.py
         - constant_fold_array
         - --repeat
-        - "1000"
+        - "100"
       resources:
         requests:
           cpu: 500m

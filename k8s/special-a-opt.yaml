@@ -16,7 +16,7 @@ spec:
         - constant_fold_array
         - --opt
         - --repeat
-        - "1000"
+        - "100"
       env:
         - name: OPT
           value: "1"

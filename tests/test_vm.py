@@ -31,6 +31,48 @@ while i < 10:
     assert run_src(src, VM) == 0
 
 
+def test_array_literal_and_index_access(capsys):
+    src = """
+arr = [1, 2, 3]
+print(arr[0])
+print(arr[1])
+print(arr[2])
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip().splitlines() == ["1", "2", "3"]
+
+
+def test_array_can_be_passed_to_function(capsys):
+    src = """
+def first(a):
+    return a[0]
+
+arr = [10, 20, 30]
+print(first(arr))
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "10"
+
+
+def test_array_len(capsys):
+    src = """
+arr = [1, 2, 3, 4]
+print(len(arr))
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "4"
+
+
+def test_array_index_assignment(capsys):
+    src = """
+arr = [1, 2, 3]
+arr[1] = 99
+print(arr[1])
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "99"
+
+
 def test_exception_is_caught(capsys):
     src = """
 def fail():

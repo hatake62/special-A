@@ -125,6 +125,91 @@ def test_constant_folding_reduces_arithmetic_instructions():
     assert ["mul"] not in opt_code
 
 
+def test_function_inlining_preserves_output_with_arrays(capsys):
+    src = """
+def add_value(values, i):
+    return values[i] + 1
+
+arr = [3, 4, 5]
+i = 0
+total = 0
+while i < 3:
+    total = total + add_value(arr, i)
+    i = i + 1
+print(total)
+"""
+    run_src(src, VM)
+    no_opt_output = capsys.readouterr().out.strip()
+
+    run_src(src, VM, optimize=True)
+    opt_output = capsys.readouterr().out.strip()
+
+    assert opt_output == no_opt_output == "15"
+
+
+def test_function_inlining_removes_simple_call_from_main():
+    src = """
+def add_value(values, i):
+    return values[i] + 1
+
+arr = [10]
+print(add_value(arr, 0))
+"""
+    no_opt_code = build(src)["main"]["code"]
+    opt_code = build(src, optimize=True)["main"]["code"]
+
+    assert ["call", "add_value", 2] in no_opt_code
+    assert ["call", "add_value", 2] not in opt_code
+    assert ["call", "print", 1] in opt_code
+
+
+def test_inlining_and_constant_folding_are_combined():
+    src = """
+def add_folded(n):
+    return n + (2 * 3)
+
+print(add_folded(4))
+"""
+    opt_code = build(src, optimize=True)["main"]["code"]
+
+    assert ["call", "add_folded", 1] not in opt_code
+    assert ["push", 10] in opt_code
+    assert ["add"] not in opt_code
+    assert ["mul"] not in opt_code
+
+
+def test_inlining_skips_functions_with_control_flow_or_raise(capsys):
+    src = """
+def fail_if_zero(n):
+    if n == 0:
+        raise 1
+    return n
+
+try:
+    print(fail_if_zero(0))
+except:
+    print(999)
+"""
+    opt_code = build(src, optimize=True)["main"]["code"]
+
+    run_src(src, VM, optimize=True)
+
+    assert ["call", "fail_if_zero", 1] in opt_code
+    assert capsys.readouterr().out.strip() == "999"
+
+
+def test_inlining_skips_recursive_return_expression():
+    src = """
+def loop(n):
+    return loop(n)
+
+print(loop(1))
+"""
+    opt_code = build(src, optimize=True)["main"]["code"]
+
+    assert ["call", "loop", 1] in opt_code
+
+
 def test_exception_is_caught(capsys):
     src = """
 def fail():

@@ -57,6 +57,16 @@ def test_run_case_enables_optimization_with_opt(capsys):
     assert opt["instruction_count"] < no_opt["instruction_count"]
 
 
+def test_run_case_supports_inline_array_case(capsys):
+    assert run_case.main(["inline_array", "--compare", "--repeat", "1"]) == 0
+
+    payload = load_cli_json(capsys)
+
+    assert payload["case"] == "inline_array"
+    assert payload["result_match"] is True
+    assert payload["opt"]["instruction_count"] < payload["no_opt"]["instruction_count"]
+
+
 def test_run_case_compare_reports_matching_results(capsys):
     assert run_case.main(["constant_fold_array", "--compare", "--repeat", "2"]) == 0
 

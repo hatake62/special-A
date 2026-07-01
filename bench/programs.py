@@ -84,3 +84,16 @@ while i < 5000:
     total = total + score_values(arr)
     i = i + 1
 """
+
+
+INLINE_ARRAY_BENCH_SRC = """
+def add_value(values, i):
+    return values[i] + 1
+
+arr = [1, 2, 3, 4, 5, 6, 7, 8]
+i = 0
+total = 0
+while i < 20000:
+    total = total + add_value(arr, i - (i / 8) * 8)
+    i = i + 1
+"""

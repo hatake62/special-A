@@ -60,3 +60,32 @@ with the base VM:
 ```sh
 python main.py --base-vm path/to/program.src
 ```
+
+Array example:
+
+```sh
+python main.py examples/array.src
+```
+
+## Arrays
+
+配列リテラル、添字アクセス、添字代入、`len` に対応しています。配列は関数に渡せるため、ループと組み合わせて集計処理も書けます。
+
+```python
+def first(values):
+    return values[0]
+
+numbers = [10, 20, 30]
+numbers[1] = 25
+print(first(numbers))
+print(len(numbers))
+```
+
+スライスは未対応です。
+
+## VM Instructions
+
+- `build_array n`: スタック上の `n` 個の値から配列を作り、結果を積みます。
+- `get_index`: スタックから配列と添字を取り出し、`array[index]` の値を積みます。
+- `set_index`: スタックから配列、添字、値を取り出し、`array[index] = value` を実行して値を積みます。
+- `len`: 組み込み関数として配列などの長さを返します。

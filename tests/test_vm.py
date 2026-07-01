@@ -42,6 +42,27 @@ print(arr[2])
     assert capsys.readouterr().out.strip().splitlines() == ["1", "2", "3"]
 
 
+def test_array_can_be_passed_to_function(capsys):
+    src = """
+def first(a):
+    return a[0]
+
+arr = [10, 20, 30]
+print(first(arr))
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "10"
+
+
+def test_array_len(capsys):
+    src = """
+arr = [1, 2, 3, 4]
+print(len(arr))
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "4"
+
+
 def test_exception_is_caught(capsys):
     src = """
 def fail():

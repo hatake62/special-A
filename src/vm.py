@@ -95,6 +95,13 @@ class BaseVM:
             self.stack.append(value)
             return
 
+        if name == "len":
+            if argc != 1:
+                raise ValueError("引数の個数が違います: len")
+            value = self.stack.pop()
+            self.stack.append(len(value))
+            return
+
         if name not in self.functions:
             raise ValueError(f"未定義の関数: {name}")
 

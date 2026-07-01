@@ -1,4 +1,5 @@
 from .models import ExceptionEntry
+from .optimizer import fold_constants
 from .parser import parse_program
 
 
@@ -179,5 +180,8 @@ def compile_program(program):
     return functions
 
 
-def build(src):
-    return compile_program(parse_program(src))
+def build(src, optimize=False):
+    program = parse_program(src)
+    if optimize:
+        program = fold_constants(program)
+    return compile_program(program)

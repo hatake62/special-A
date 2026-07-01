@@ -15,6 +15,7 @@ class BaseVM:
         self.functions = functions
         self.stack = []
         self.frames = []
+        self.instruction_count = 0
 
     def run(self):
         self.do_call("main", 0)
@@ -23,6 +24,7 @@ class BaseVM:
             frame = self.frames[-1]
             instr = frame.func["code"][frame.pc]
             frame.pc += 1
+            self.instruction_count += 1
             op = instr[0]
 
             if op == "push":
@@ -186,5 +188,5 @@ class VM(BaseVM):
         raise VMError(value)
 
 
-def run_src(src, vm_class=VM):
-    return vm_class(build(src)).run()
+def run_src(src, vm_class=VM, optimize=False):
+    return vm_class(build(src, optimize=optimize)).run()

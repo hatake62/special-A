@@ -18,6 +18,11 @@ def parse_args(argv=None):
         action="store_true",
         help="run with the base VM without raise/except support",
     )
+    parser.add_argument(
+        "--opt",
+        action="store_true",
+        help="enable compile-time optimizations",
+    )
     return parser.parse_args(argv)
 
 
@@ -32,7 +37,7 @@ def main(argv=None):
     vm_class = BaseVM if args.base_vm else VM
 
     try:
-        run_src(read_source(args.source), vm_class)
+        run_src(read_source(args.source), vm_class, optimize=args.opt)
     except (OSError, SyntaxError, ValueError, VMError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

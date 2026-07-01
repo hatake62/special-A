@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: special-a-inline-opt
+  labels:
+    app: special-a-inline-opt
+spec:
+  restartPolicy: Never
+  containers:
+    - name: benchmark
+      image: special-a-power:latest
+      imagePullPolicy: IfNotPresent
+      command: ["python"]
+      args:
+        - bench/run_case.py
+        - inline_array
+        - --opt
+        - --repeat
+        - "100"
+      env:
+        - name: OPT
+          value: "1"
+      resources:
+        requests:
+          cpu: 500m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi

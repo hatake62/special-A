@@ -9,7 +9,10 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from bench.programs import CONSTANT_FOLD_ARRAY_BENCH_SRC  # noqa: E402
+from bench.programs import (  # noqa: E402
+    CONSTANT_FOLD_ARRAY_BENCH_SRC,
+    INLINE_ARRAY_BENCH_SRC,
+)
 from src import VM, build  # noqa: E402
 
 
@@ -17,6 +20,11 @@ CASES = {
     "constant_fold_array": {
         "label": "拡張VM 定数畳み込み・配列",
         "src": CONSTANT_FOLD_ARRAY_BENCH_SRC,
+        "vm_class": VM,
+    },
+    "inline_array": {
+        "label": "拡張VM インライン展開・配列",
+        "src": INLINE_ARRAY_BENCH_SRC,
         "vm_class": VM,
     }
 }
@@ -96,7 +104,7 @@ def parse_args(argv=None):
     parser.add_argument(
         "--opt",
         action="store_true",
-        help="定数畳み込み最適化を有効にする",
+        help="コンパイル時最適化を有効にする",
     )
     duration_group = parser.add_mutually_exclusive_group()
     duration_group.add_argument(

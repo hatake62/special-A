@@ -8,6 +8,9 @@
 python bench/run_case.py constant_fold_array
 python bench/run_case.py constant_fold_array --opt
 python bench/run_case.py constant_fold_array --compare
+python bench/run_case.py inline_array --repeat 100
+python bench/run_case.py inline_array --opt --repeat 100
+python bench/run_case.py inline_array --compare --repeat 100
 ```
 
 ## 結果記録表
@@ -16,12 +19,15 @@ python bench/run_case.py constant_fold_array --compare
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
 |  |  | constant_fold_array | なし | 108.70912917200621 sec | 116502000 | 2.4904832981266732e-06 W | 0.0002707382705567766 J |  | repeat=100 |
 |  |  | constant_fold_array | あり | 73.86739937100356 sec | 84502000 | 2.4052216740532554e-06 W | 0.00017766746997308557 J |  | repeat=100 |
+|  |  | inline_array | なし | 65.17537758199614 sec | 54002000 | 3.156515939514716e-06 W | 0.00020572711820146094 J |  | repeat=100 |
+|  |  | inline_array | あり | 47.83581799500098 sec | 46002000 | 3.7025512475053206e-06 W | 0.00017711456759282834 J |  | repeat=100 |
 
 ## 比較メモ
 
 | 測定日 | ケース | 出力一致 | 最適化なし VM命令数 | 最適化あり VM命令数 | 命令削減数 | 電力差 | エネルギー差 | メモ |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
 |  | constant_fold_array |  | 116502000 | 84502000 | 32000000 | -8.526162407341775e-08 W | -0.00009307080058369102 J | repeat=100 の固定回数方式で測定。実行時間は約32.1%短縮、VM命令数は約27.5%削減、消費エネルギーは約34.4%削減。 |
+|  | inline_array |  | 54002000 | 46002000 | 8000000 | 5.460353079906045e-07 W | -0.0000286125506086326 J | repeat=100 の固定回数方式で測定。実行時間は約26.6%短縮、VM命令数は約14.8%削減、消費エネルギーは約13.9%削減。平均電力は上がったが、実行時間短縮によりエネルギー全体は減った。 |
 
 ## 固定回数方式 repeat=100 の測定
 

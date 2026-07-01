@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: special-a-combined-const
+  labels:
+    app: special-a-combined-const
+spec:
+  restartPolicy: Never
+  containers:
+    - name: benchmark
+      image: special-a-power:latest
+      imagePullPolicy: IfNotPresent
+      command: ["python"]
+      args:
+        - bench/run_case.py
+        - combined_array
+        - --opt
+        - const
+        - --repeat
+        - "100"
+      env:
+        - name: OPT
+          value: "const"
+      resources:
+        requests:
+          cpu: 500m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi

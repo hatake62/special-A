@@ -97,3 +97,16 @@ while i < 20000:
     total = total + add_value(arr, i - (i / 8) * 8)
     i = i + 1
 """
+
+
+COMBINED_OPT_BENCH_SRC = """
+def add_const(x):
+    return x + (10 * 20 + 30 * 40 - 50)
+
+arr = [1, 2, 3, 4, 5, 6, 7, 8]
+i = 0
+total = 0
+while i < 20000:
+    total = total + add_const(arr[i - (i / 8) * 8])
+    i = i + 1
+"""

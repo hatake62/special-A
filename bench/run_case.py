@@ -10,6 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from bench.programs import (  # noqa: E402
+    COMBINED_OPT_BENCH_SRC,
     CONSTANT_FOLD_ARRAY_BENCH_SRC,
     INLINE_ARRAY_BENCH_SRC,
 )
@@ -25,6 +26,11 @@ CASES = {
     "inline_array": {
         "label": "拡張VM インライン展開・配列",
         "src": INLINE_ARRAY_BENCH_SRC,
+        "vm_class": VM,
+    },
+    "combined_array": {
+        "label": "拡張VM 定数畳み込み+インライン展開・配列",
+        "src": COMBINED_OPT_BENCH_SRC,
         "vm_class": VM,
     }
 }
@@ -44,9 +50,18 @@ def positive_int(value):
     return repeat
 
 
+def normalize_opt_mode(optimize=False):
+    if optimize is True:
+        return "all"
+    if optimize is False or optimize is None:
+        return "none"
+    return optimize
+
+
 def run_case(case_name, optimize=False, seconds=None, repeat=None):
     case = CASES[case_name]
-    functions = build(case["src"], optimize=optimize)
+    opt_mode = normalize_opt_mode(optimize)
+    functions = build(case["src"], optimize=opt_mode)
     total_instruction_count = 0
     result = None
     run_count = 0
@@ -79,7 +94,8 @@ def run_case(case_name, optimize=False, seconds=None, repeat=None):
 
     return {
         "case": case_name,
-        "optimize": optimize,
+        "optimize": opt_mode != "none",
+        "opt_mode": opt_mode,
         "mode": mode,
         "repeat": run_count,
         "elapsed_sec": elapsed,
@@ -103,8 +119,11 @@ def parse_args(argv=None):
     )
     parser.add_argument(
         "--opt",
-        action="store_true",
-        help="コンパイル時最適化を有効にする",
+        nargs="?",
+        const="all",
+        default="none",
+        choices=("const", "all"),
+        help="コンパイル時最適化モード。省略値なし、--opt 単体は all",
     )
     duration_group = parser.add_mutually_exclusive_group()
     duration_group.add_argument(
@@ -129,10 +148,16 @@ def main(argv=None):
     args = parse_args(argv)
 
     if args.compare:
+        compare_opt_mode = "all" if args.opt == "none" else args.opt
         no_opt = run_case(
-            args.case, optimize=False, seconds=args.seconds, repeat=args.repeat
+            args.case, optimize="none", seconds=args.seconds, repeat=args.repeat
         )
-        opt = run_case(args.case, optimize=True, seconds=args.seconds, repeat=args.repeat)
+        opt = run_case(
+            args.case,
+            optimize=compare_opt_mode,
+            seconds=args.seconds,
+            repeat=args.repeat,
+        )
         result_match = no_opt["result"] == opt["result"]
         print_json(
             {

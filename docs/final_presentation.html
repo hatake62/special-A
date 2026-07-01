@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Special-A 発表スライド</title>
+  <style>
+    :root {
+      --bg: #f7f7f2;
+      --ink: #171717;
+      --muted: #5a5f66;
+      --line: #d9d7ca;
+      --accent: #0f766e;
+      --accent2: #b45309;
+      --panel: #ffffff;
+      --code: #111827;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      padding: 5.2vh 6vw 6vh;
+      position: relative;
+      background:
+        linear-gradient(90deg, rgba(15, 118, 110, 0.06), transparent 32%),
+        var(--bg);
+    }
+
+    .slide.active {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 2.8vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 2vh;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 0 0 0.8vh;
+    }
+
+    h1, h2 {
+      margin: 0;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6.6rem);
+      max-width: 13ch;
+    }
+
+    h2 {
+      font-size: clamp(2.2rem, 5.2vw, 4.9rem);
+      max-width: 15ch;
+    }
+
+    h3 {
+      margin: 0 0 1vh;
+      font-size: clamp(1.25rem, 2.1vw, 1.8rem);
+    }
+
+    p, li {
+      font-size: clamp(1.15rem, 2.1vw, 1.85rem);
+      line-height: 1.55;
+    }
+
+    p { margin: 0 0 1.2vh; }
+
+    ul {
+      margin: 0;
+      padding-left: 1.4em;
+    }
+
+    li + li { margin-top: 0.8vh; }
+
+    .lead {
+      font-size: clamp(1.35rem, 2.5vw, 2.2rem);
+      color: var(--muted);
+      max-width: 32ch;
+    }
+
+    .content {
+      align-self: center;
+      width: 100%;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 3vw;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 2.2vh 2vw;
+      box-shadow: 0 12px 32px rgba(23, 23, 23, 0.06);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.4vw;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 2vh 1.5vw;
+      min-height: 20vh;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: clamp(2rem, 4.2vw, 4.2rem);
+      line-height: 1;
+      color: var(--accent);
+      margin-bottom: 1vh;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.6vw, 1.35rem);
+      line-height: 1.45;
+    }
+
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      letter-spacing: 0;
+    }
+
+    pre {
+      margin: 0;
+      padding: 2vh 1.6vw;
+      background: var(--code);
+      color: #f9fafb;
+      border-radius: 8px;
+      overflow: auto;
+      font-size: clamp(0.88rem, 1.55vw, 1.22rem);
+      line-height: 1.45;
+      max-height: 52vh;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1vw;
+      align-items: stretch;
+    }
+
+    .step {
+      min-height: 18vh;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 2vh 1.2vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .step b {
+      font-size: clamp(1.1rem, 1.8vw, 1.55rem);
+    }
+
+    .step small {
+      color: var(--muted);
+      font-size: clamp(0.9rem, 1.25vw, 1.1rem);
+      line-height: 1.4;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: clamp(1rem, 1.65vw, 1.35rem);
+    }
+
+    th, td {
+      padding: 1.4vh 1vw;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 9em 1fr 5em;
+      gap: 1vw;
+      align-items: center;
+      margin: 2vh 0;
+      font-size: clamp(1.05rem, 1.8vw, 1.5rem);
+    }
+
+    .bar {
+      height: 3.2vh;
+      border: 1px solid var(--line);
+      background: #ecebe2;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .bar.orange > i { background: var(--accent2); }
+
+    footer {
+      color: var(--muted);
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .tag {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    @media (max-width: 760px) {
+      .slide { padding: 4vh 5vw 5vh; }
+      .two, .metric-grid, .flow {
+        grid-template-columns: 1fr;
+      }
+      pre { max-height: 42vh; }
+      p, li { font-size: 1.06rem; }
+      h1 { font-size: 3rem; }
+      h2 { font-size: 2.3rem; }
+      .metric { min-height: auto; }
+      .step { min-height: auto; }
+    }
+
+    @media print {
+      body { background: white; }
+      .deck { height: auto; overflow: visible; }
+      .slide {
+        display: grid !important;
+        width: 297mm;
+        height: 210mm;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide active">
+      <header>
+        <p class="eyebrow">自作言語処理系 発表</p>
+        <h1>Special-A</h1>
+      </header>
+      <div class="content">
+        <p class="lead">Python風の小さな言語を、自作コンパイラと自作VMで実行する。さらに、最適化で速さと消費エネルギーを改善する処理系。</p>
+      </div>
+      <footer><span>10分発表 + デモ</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">0から説明</p>
+        <h2>何を作ったか</h2>
+      </header>
+      <div class="content two">
+        <div>
+          <ul>
+            <li>入力は Python の一部に似たソースコード</li>
+            <li>関数、配列、while、if、四則演算、比較を実行できる</li>
+            <li>try / except / raise を持つ拡張VMも実装</li>
+            <li>定数畳み込みと関数インライン展開で最適化できる</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>最低ラインへの対応</h3>
+          <p><span class="tag">関数</span>: def / call / return</p>
+          <p><span class="tag">配列</span>: リテラル / 添字アクセス / 添字代入 / len</p>
+        </div>
+      </div>
+      <footer><span>前のレポートに依存せず、この処理系単体として説明</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">言語仕様</p>
+        <h2>書けるプログラム</h2>
+      </header>
+      <div class="content two">
+        <pre><code>def sum_array(values):
+    i = 0
+    total = 0
+    while i &lt; len(values):
+        total = total + values[i]
+        i = i + 1
+    return total
+
+numbers = [10, 20, 30]
+numbers[1] = 25
+print(sum_array(numbers))</code></pre>
+        <div>
+          <ul>
+            <li>Pythonそのものではなく、Python風の小さな言語として扱う</li>
+            <li>構文解析には Python 標準の ast を使い、内部用ASTへ変換</li>
+            <li>その後、自作VM命令へコンパイルして実行する</li>
+          </ul>
+        </div>
+      </div>
+      <footer><span>examples/array.src</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">実装方式</p>
+        <h2>処理の流れ</h2>
+      </header>
+      <div class="content">
+        <div class="flow">
+          <div class="step"><b>1. ソース</b><small>Python風のプログラムを書く</small></div>
+          <div class="step"><b>2. 構文解析</b><small>Python ast から独自ASTへ変換</small></div>
+          <div class="step"><b>3. 最適化</b><small>定数畳み込み、インライン展開</small></div>
+          <div class="step"><b>4. コンパイル</b><small>スタックVM命令列を生成</small></div>
+          <div class="step"><b>5. 実行</b><small>VMが命令を解釈して結果を出す</small></div>
+        </div>
+      </div>
+      <footer><span>src/parser.py, src/optimizer.py, src/compiler.py, src/vm.py</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">VM</p>
+        <h2>スタックで実行する</h2>
+      </header>
+      <div class="content two">
+        <pre><code># 例: 10 + 20
+push 10
+push 20
+add
+
+# 配列
+push 10
+push 20
+push 30
+build_array 3
+get_index
+set_index</code></pre>
+        <div>
+          <ul>
+            <li>値はスタックに積む</li>
+            <li>add / sub / mul / div は上の2値を取り出して計算</li>
+            <li>関数呼び出しではフレームを積む</li>
+            <li>配列操作は build_array / get_index / set_index 命令で実行</li>
+          </ul>
+        </div>
+      </div>
+      <footer><span>VM命令数を数えるので、最適化の効果を説明しやすい</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">デモ1</p>
+        <h2>関数と配列を動かす</h2>
+      </header>
+      <div class="content two">
+        <pre><code>$ python3 main.py examples/array.src
+10
+25
+3
+65</code></pre>
+        <div>
+          <ul>
+            <li>numbers[0] の読み出しで 10</li>
+            <li>numbers[1] = 25 の更新後に 25</li>
+            <li>len(numbers) で 3</li>
+            <li>sum_array(numbers) で 10 + 25 + 30 = 65</li>
+          </ul>
+        </div>
+      </div>
+      <footer><span>最低ラインの「関数」と「配列」を実演</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">デモ2</p>
+        <h2>例外もVMで処理する</h2>
+      </header>
+      <div class="content two">
+        <pre><code>def risky(n):
+    if n == 0:
+        raise 99
+    return 100 / n
+
+try:
+    print(risky(0))
+except:
+    print(777)</code></pre>
+        <pre><code>$ python3 main.py examples/demo.src
+777
+20</code></pre>
+      </div>
+      <footer><span>例外テーブルを使って handler_pc にジャンプする</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">凄さ 1</p>
+        <h2>コンパイル時に計算を消す</h2>
+      </header>
+      <div class="content two">
+        <pre><code># 最適化前
+total = total + values[i] + (10 * 20 + 30 * 40 - 50)
+
+# 定数畳み込み後
+total = total + values[i] + 1350</code></pre>
+        <div>
+          <ul>
+            <li>毎回同じ答えになる式を、実行前に計算しておく</li>
+            <li>ループの中にある定数式ほど効果が大きい</li>
+            <li>0除算のように意味が変わる可能性がある式は畳み込まない</li>
+          </ul>
+        </div>
+      </div>
+      <footer><span>定数畳み込み: constant folding</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">凄さ 2</p>
+        <h2>小さい関数呼び出しを消す</h2>
+      </header>
+      <div class="content two">
+        <pre><code>def add_const(x):
+    return x + 1350
+
+total = total + add_const(arr[i])</code></pre>
+        <pre><code># インライン展開後
+total = total + (arr[i] + 1350)</code></pre>
+      </div>
+      <footer><span>単純な return だけの関数を呼び出しなしの式へ置換</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">測定結果</p>
+        <h2>命令数が減る</h2>
+      </header>
+      <div class="content">
+        <table>
+          <thead>
+            <tr><th>ベンチマーク</th><th class="num">最適化なし</th><th class="num">最適化あり</th><th class="num">削減</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>定数畳み込み・配列</td><td class="num">1,165,020</td><td class="num">845,020</td><td class="num">320,000命令</td></tr>
+            <tr><td>インライン展開・配列</td><td class="num">540,020</td><td class="num">460,020</td><td class="num">80,000命令</td></tr>
+            <tr><td>組み合わせ</td><td class="num">680,020</td><td class="num">460,020</td><td class="num">220,000命令</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer><span>bench/run_case.py repeat=1 のVM命令数</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">測定結果</p>
+        <h2>消費エネルギーも下がる</h2>
+      </header>
+      <div class="content">
+        <div class="bar-row"><span>最適化なし</span><div class="bar orange"><i style="width: 100%"></i></div><span>100%</span></div>
+        <div class="bar-row"><span>定数畳み込み</span><div class="bar"><i style="width: 80.3%"></i></div><span>80.3%</span></div>
+        <div class="bar-row"><span>両方</span><div class="bar"><i style="width: 63%"></i></div><span>63.0%</span></div>
+        <div class="metric-grid" style="margin-top: 4vh;">
+          <div class="metric"><strong>37.0%</strong><span>最適化なしと比べた combined_array の消費エネルギー削減</span></div>
+          <div class="metric"><strong>23.5%</strong><span>定数畳み込みのみでのVM命令数削減</span></div>
+          <div class="metric"><strong>Kepler</strong><span>Kubernetes Pod の消費電力を Prometheus から取得</span></div>
+        </div>
+      </div>
+      <footer><span>docs/final_results_summary.md の測定値を使用</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">デモ3</p>
+        <h2>最適化前後を比較する</h2>
+      </header>
+      <div class="content two">
+        <pre><code>$ python3 bench/run_case.py combined_array --compare --repeat 1
+
+result_match: true
+no_opt instructions: 680020
+opt instructions:    460020</code></pre>
+        <div>
+          <ul>
+            <li>result_match が true なので、最適化しても結果は同じ</li>
+            <li>同じ結果を、少ないVM命令で実行できている</li>
+            <li>時間は実行環境で揺れるため、命令数も合わせて見る</li>
+          </ul>
+        </div>
+      </div>
+      <footer><span>ライブではこの短いコマンドを使う</span><span class="page"></span></footer>
+    </section>
+
+    <section class="slide">
+      <header>
+        <p class="eyebrow">まとめ</p>
+        <h2>何が凄いのか</h2>
+      </header>
+      <div class="content">
+        <div class="metric-grid">
+          <div class="metric"><strong>言語</strong><span>関数・配列・制御構文・例外を持つ小さな言語を実装</span></div>
+          <div class="metric"><strong>VM</strong><span>スタック、フレーム、例外テーブル、命令数計測まで自作</span></div>
+          <div class="metric"><strong>最適化</strong><span>定数畳み込みとインライン展開で速さとエネルギーを改善</span></div>
+        </div>
+      </div>
+      <footer><span>Special-A: 作って終わりではなく、測って改善した処理系</span><span class="page"></span></footer>
+    </section>
+  </main>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const pages = [...document.querySelectorAll(".page")];
+    let current = 0;
+
+    function show(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === current));
+      pages.forEach((page) => page.textContent = `${current + 1} / ${slides.length}`);
+      history.replaceState(null, "", `#${current + 1}`);
+    }
+
+    function fromHash() {
+      const n = Number(location.hash.slice(1));
+      if (Number.isInteger(n) && n >= 1 && n <= slides.length) show(n - 1);
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (["ArrowRight", " ", "PageDown"].includes(event.key)) show(current + 1);
+      if (["ArrowLeft", "PageUp"].includes(event.key)) show(current - 1);
+      if (event.key === "Home") show(0);
+      if (event.key === "End") show(slides.length - 1);
+    });
+
+    window.addEventListener("hashchange", fromHash);
+    fromHash();
+    show(current);
+  </script>
+</body>
+</html>

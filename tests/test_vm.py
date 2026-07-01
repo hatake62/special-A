@@ -3,7 +3,7 @@ import io
 import pytest
 
 import main
-from src import BaseVM, VM, VMError, run_src
+from src import BaseVM, VM, VMError, build, run_src
 
 
 def test_function_call_prints_result(capsys):
@@ -134,6 +134,14 @@ def test_uncaught_exception_raises_vm_error():
 def test_base_vm_does_not_support_raise_instruction():
     with pytest.raises(ValueError):
         run_src("raise 1", BaseVM)
+
+
+def test_vm_counts_executed_instructions():
+    vm = VM(build("print(1)\n"))
+
+    assert vm.instruction_count == 0
+    vm.run()
+    assert vm.instruction_count > 0
 
 
 def test_main_runs_source_file(tmp_path, capsys):

@@ -48,3 +48,21 @@ while i < 5000:
         total = total + 1
     i = i + 1
 """
+
+
+ARRAY_SUM_BENCH_SRC = """
+def sum_array(values):
+    i = 0
+    total = 0
+    while i < len(values):
+        total = total + values[i]
+        i = i + 1
+    return total
+
+arr = [1, 2, 3, 4, 5, 6, 7, 8]
+i = 0
+total = 0
+while i < 10000:
+    total = total + sum_array(arr)
+    i = i + 1
+"""

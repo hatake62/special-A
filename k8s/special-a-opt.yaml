@@ -15,8 +15,8 @@ spec:
         - bench/run_case.py
         - constant_fold_array
         - --opt
-        - --seconds
-        - "60"
+        - --repeat
+        - "1000"
       env:
         - name: OPT
           value: "1"

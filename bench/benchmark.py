@@ -10,6 +10,7 @@ from src import BaseVM, VM, build  # noqa: E402
 from bench.programs import (  # noqa: E402
     ARRAY_SUM_BENCH_SRC,
     CALL_BENCH_SRC,
+    COMBINED_OPT_BENCH_SRC,
     CONSTANT_FOLD_ARRAY_BENCH_SRC,
     EXCEPTION_BENCH_SRC,
     INLINE_ARRAY_BENCH_SRC,
@@ -17,8 +18,17 @@ from bench.programs import (  # noqa: E402
 )
 
 
+def normalize_opt_mode(optimize=False):
+    if optimize is True:
+        return "all"
+    if optimize is False or optimize is None:
+        return "none"
+    return optimize
+
+
 def benchmark(label, src, vm_class, optimize=False, repeat=5):
-    functions = build(src, optimize=optimize)
+    opt_mode = normalize_opt_mode(optimize)
+    functions = build(src, optimize=opt_mode)
     times = []
     instruction_counts = []
     for _ in range(repeat):
@@ -30,7 +40,8 @@ def benchmark(label, src, vm_class, optimize=False, repeat=5):
 
     return {
         "label": label,
-        "optimize": optimize,
+        "optimize": opt_mode != "none",
+        "opt_mode": opt_mode,
         "min": min(times),
         "avg": statistics.mean(times),
         "instructions": instruction_counts[0],
@@ -48,6 +59,7 @@ def print_benchmark_programs():
     print_source_block("配列合計", ARRAY_SUM_BENCH_SRC)
     print_source_block("定数畳み込み・配列", CONSTANT_FOLD_ARRAY_BENCH_SRC)
     print_source_block("インライン展開・配列", INLINE_ARRAY_BENCH_SRC)
+    print_source_block("定数畳み込み+インライン展開・配列", COMBINED_OPT_BENCH_SRC)
     print_source_block("tryあり・例外なし", TRY_NO_EXCEPTION_BENCH_SRC)
     print_source_block("例外発生", EXCEPTION_BENCH_SRC)
 
@@ -59,6 +71,7 @@ def print_benchmark_results():
         ("拡張VM 配列合計", ARRAY_SUM_BENCH_SRC, VM),
         ("拡張VM 定数畳み込み・配列", CONSTANT_FOLD_ARRAY_BENCH_SRC, VM),
         ("拡張VM インライン展開・配列", INLINE_ARRAY_BENCH_SRC, VM),
+        ("拡張VM 定数畳み込み+インライン展開・配列", COMBINED_OPT_BENCH_SRC, VM),
         ("拡張VM tryあり・例外なし", TRY_NO_EXCEPTION_BENCH_SRC, VM),
         ("拡張VM 例外発生", EXCEPTION_BENCH_SRC, VM),
     ]
@@ -70,8 +83,8 @@ def print_benchmark_results():
 
     call_base = results[0][0]
     call_extended = results[1][0]
-    try_no_exception = results[5][0]
-    exception_extended = results[6][0]
+    try_no_exception = results[6][0]
+    exception_extended = results[7][0]
     overhead = call_extended["min"] / call_base["min"]
     exception_cost = exception_extended["min"] / try_no_exception["min"]
 
@@ -95,6 +108,28 @@ def print_benchmark_results():
         )
     print(f"通常実行での拡張VM/BaseVM比: {overhead:.2f}x")
     print(f"例外発生/例外なしtry比: {exception_cost:.2f}x")
+
+    combined_results = [
+        benchmark(
+            "拡張VM 定数畳み込み+インライン展開・配列",
+            COMBINED_OPT_BENCH_SRC,
+            VM,
+            optimize=mode,
+        )
+        for mode in ("none", "const", "all")
+    ]
+    print("== combined_array 3条件比較 ==")
+    baseline = combined_results[0]
+    for result in combined_results:
+        time_ratio = result["min"] / baseline["min"]
+        instruction_ratio = result["instructions"] / baseline["instructions"]
+        instruction_delta = result["instructions"] - baseline["instructions"]
+        print(
+            f"  {result['opt_mode']}: min={result['min']:.6f}s "
+            f"avg={result['avg']:.6f}s instructions={result['instructions']} "
+            f"time={time_ratio:.2f}x instructions={instruction_ratio:.2f}x "
+            f"delta={instruction_delta}"
+        )
 
 
 if __name__ == "__main__":

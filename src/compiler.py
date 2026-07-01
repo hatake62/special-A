@@ -180,8 +180,17 @@ def compile_program(program):
     return functions
 
 
+def normalize_optimization_mode(optimize=False):
+    if optimize is True:
+        return "all"
+    if optimize is False or optimize is None:
+        return "none"
+    return optimize
+
+
 def build(src, optimize=False):
     program = parse_program(src)
-    if optimize:
-        program = optimize_program(program)
+    mode = normalize_optimization_mode(optimize)
+    if mode != "none":
+        program = optimize_program(program, mode=mode)
     return compile_program(program)

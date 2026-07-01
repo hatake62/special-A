@@ -6,10 +6,19 @@ ARITHMETIC_OPS = {
 }
 
 
-def optimize_program(program):
-    program = fold_constants(program)
-    program = inline_functions(program)
-    return fold_constants(program)
+OPTIMIZATION_MODES = {"none", "const", "all"}
+
+
+def optimize_program(program, mode="all"):
+    if mode == "none":
+        return program
+    if mode == "const":
+        return fold_constants(program)
+    if mode == "all":
+        program = fold_constants(program)
+        program = inline_functions(program)
+        return fold_constants(program)
+    raise ValueError(f"未知の最適化モード: {mode}")
 
 
 def fold_constants(program):

@@ -29,27 +29,51 @@ def non_negative_float(value):
     return seconds
 
 
-def run_case(case_name, optimize=False, seconds=None):
+def positive_int(value):
+    repeat = int(value)
+    if repeat < 1:
+        raise argparse.ArgumentTypeError("--repeat must be greater than or equal to 1")
+    return repeat
+
+
+def run_case(case_name, optimize=False, seconds=None, repeat=None):
     case = CASES[case_name]
     functions = build(case["src"], optimize=optimize)
     total_instruction_count = 0
     result = None
+    run_count = 0
 
     start = time.perf_counter()
-    while True:
-        vm = case["vm_class"](functions)
-        stdout = io.StringIO()
-        with contextlib.redirect_stdout(stdout):
-            result = vm.run()
-        total_instruction_count += vm.instruction_count
-
+    if seconds is None:
+        target_repeat = repeat if repeat is not None else 1
+        for _ in range(target_repeat):
+            vm = case["vm_class"](functions)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                result = vm.run()
+            total_instruction_count += vm.instruction_count
+            run_count += 1
         elapsed = time.perf_counter() - start
-        if seconds is None or elapsed >= seconds:
-            break
+        mode = "repeat"
+    else:
+        mode = "seconds"
+        while True:
+            vm = case["vm_class"](functions)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                result = vm.run()
+            total_instruction_count += vm.instruction_count
+            run_count += 1
+
+            elapsed = time.perf_counter() - start
+            if elapsed >= seconds:
+                break
 
     return {
         "case": case_name,
         "optimize": optimize,
+        "mode": mode,
+        "repeat": run_count,
         "elapsed_sec": elapsed,
         "instruction_count": total_instruction_count,
         "result": result,
@@ -74,10 +98,16 @@ def parse_args(argv=None):
         action="store_true",
         help="定数畳み込み最適化を有効にする",
     )
-    parser.add_argument(
+    duration_group = parser.add_mutually_exclusive_group()
+    duration_group.add_argument(
         "--seconds",
         type=non_negative_float,
         help="指定した秒数以上、同じベンチマークを繰り返し実行する",
+    )
+    duration_group.add_argument(
+        "--repeat",
+        type=positive_int,
+        help="指定した回数、同じベンチマークを繰り返し実行する",
     )
     parser.add_argument(
         "--compare",
@@ -91,8 +121,10 @@ def main(argv=None):
     args = parse_args(argv)
 
     if args.compare:
-        no_opt = run_case(args.case, optimize=False, seconds=args.seconds)
-        opt = run_case(args.case, optimize=True, seconds=args.seconds)
+        no_opt = run_case(
+            args.case, optimize=False, seconds=args.seconds, repeat=args.repeat
+        )
+        opt = run_case(args.case, optimize=True, seconds=args.seconds, repeat=args.repeat)
         result_match = no_opt["result"] == opt["result"]
         print_json(
             {
@@ -104,7 +136,9 @@ def main(argv=None):
         )
         return 0 if result_match else 1
 
-    print_json(run_case(args.case, optimize=args.opt, seconds=args.seconds))
+    print_json(
+        run_case(args.case, optimize=args.opt, seconds=args.seconds, repeat=args.repeat)
+    )
     return 0
 
 

@@ -63,6 +63,15 @@ print(len(arr))
     assert capsys.readouterr().out.strip() == "4"
 
 
+def test_empty_array_len(capsys):
+    src = """
+arr = []
+print(len(arr))
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "0"
+
+
 def test_array_index_assignment(capsys):
     src = """
 arr = [1, 2, 3]
@@ -71,6 +80,19 @@ print(arr[1])
 """
     run_src(src, VM)
     assert capsys.readouterr().out.strip() == "99"
+
+
+def test_array_update_and_expression_index_in_function(capsys):
+    src = """
+def pick(a, i):
+    return a[i + 1]
+
+arr = [3, 4, 5]
+arr[2] = 9
+print(pick(arr, 1))
+"""
+    run_src(src, VM)
+    assert capsys.readouterr().out.strip() == "9"
 
 
 def test_exception_is_caught(capsys):

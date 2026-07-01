@@ -1,0 +1,16 @@
+def sum_array(values):
+    i = 0
+    total = 0
+    while i < len(values):
+        total = total + values[i]
+        i = i + 1
+    return total
+
+numbers = [10, 20, 30]
+print(numbers[0])
+
+numbers[1] = 25
+print(numbers[1])
+
+print(len(numbers))
+print(sum_array(numbers))

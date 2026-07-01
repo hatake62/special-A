@@ -59,7 +59,7 @@ def sum_array(values):
         i = i + 1
     return total
 
-arr = [1, 2, 3, 4, 5, 6, 7, 8]
+arr = [1 + 2, 3 * 4, 10 - 1, 8 / 2, 5 + 6, 7 * 8, 20 - 3, 18 / 3]
 i = 0
 total = 0
 while i < 10000:

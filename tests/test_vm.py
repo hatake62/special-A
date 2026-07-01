@@ -95,6 +95,36 @@ print(pick(arr, 1))
     assert capsys.readouterr().out.strip() == "9"
 
 
+def test_constant_folding_preserves_results_including_arrays(capsys):
+    src = """
+def pick(values):
+    return values[0] + values[1] + values[2] + values[3]
+
+arr = [1 + 2, 3 * 4, 10 - 1, 8 / 2]
+print(pick(arr))
+"""
+    run_src(src, VM)
+    no_opt_output = capsys.readouterr().out.strip()
+
+    run_src(src, VM, optimize=True)
+    opt_output = capsys.readouterr().out.strip()
+
+    assert opt_output == no_opt_output == "28"
+
+
+def test_constant_folding_reduces_arithmetic_instructions():
+    src = "print((2 + 3) * (10 - 1))\n"
+
+    no_opt_code = build(src)["main"]["code"]
+    opt_code = build(src, optimize=True)["main"]["code"]
+
+    assert ["add"] in no_opt_code
+    assert ["mul"] in no_opt_code
+    assert ["push", 45] in opt_code
+    assert ["add"] not in opt_code
+    assert ["mul"] not in opt_code
+
+
 def test_exception_is_caught(capsys):
     src = """
 def fail():
@@ -157,6 +187,14 @@ def test_main_reads_source_from_stdin(monkeypatch, capsys):
 
     assert main.main(["-"]) == 0
     assert capsys.readouterr().out.strip() == "456"
+
+
+def test_main_enables_optimization_with_opt(tmp_path, capsys):
+    source = tmp_path / "program.src"
+    source.write_text("print(2 + 3)\n", encoding="utf-8")
+
+    assert main.main(["--opt", str(source)]) == 0
+    assert capsys.readouterr().out.strip() == "5"
 
 
 def test_main_returns_error_status_for_missing_file(capsys):

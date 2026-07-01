@@ -15,8 +15,8 @@ from bench.programs import (  # noqa: E402
 )
 
 
-def benchmark(label, src, vm_class, repeat=5):
-    functions = build(src)
+def benchmark(label, src, vm_class, optimize=False, repeat=5):
+    functions = build(src, optimize=optimize)
     times = []
     instruction_counts = []
     for _ in range(repeat):
@@ -28,6 +28,7 @@ def benchmark(label, src, vm_class, repeat=5):
 
     return {
         "label": label,
+        "optimize": optimize,
         "min": min(times),
         "avg": statistics.mean(times),
         "instructions": instruction_counts[0],
@@ -48,24 +49,43 @@ def print_benchmark_programs():
 
 
 def print_benchmark_results():
-    results = [
-        benchmark("BaseVM 関数呼び出し", CALL_BENCH_SRC, BaseVM),
-        benchmark("拡張VM 関数呼び出し", CALL_BENCH_SRC, VM),
-        benchmark("拡張VM 配列合計", ARRAY_SUM_BENCH_SRC, VM),
-        benchmark("拡張VM tryあり・例外なし", TRY_NO_EXCEPTION_BENCH_SRC, VM),
-        benchmark("拡張VM 例外発生", EXCEPTION_BENCH_SRC, VM),
+    specs = [
+        ("BaseVM 関数呼び出し", CALL_BENCH_SRC, BaseVM),
+        ("拡張VM 関数呼び出し", CALL_BENCH_SRC, VM),
+        ("拡張VM 配列合計", ARRAY_SUM_BENCH_SRC, VM),
+        ("拡張VM tryあり・例外なし", TRY_NO_EXCEPTION_BENCH_SRC, VM),
+        ("拡張VM 例外発生", EXCEPTION_BENCH_SRC, VM),
     ]
 
-    call_base, call_extended, _, try_no_exception, exception_extended = results
+    results = [
+        (benchmark(label, src, vm_class), benchmark(label, src, vm_class, optimize=True))
+        for label, src, vm_class in specs
+    ]
+
+    call_base = results[0][0]
+    call_extended = results[1][0]
+    try_no_exception = results[3][0]
+    exception_extended = results[4][0]
     overhead = call_extended["min"] / call_base["min"]
     exception_cost = exception_extended["min"] / try_no_exception["min"]
 
     print("== ベンチマーク結果 ==")
-    for result in results:
+    for no_opt, opt in results:
+        time_ratio = opt["min"] / no_opt["min"]
+        instruction_ratio = opt["instructions"] / no_opt["instructions"]
+        instruction_delta = opt["instructions"] - no_opt["instructions"]
+        print(f"{no_opt['label']}:")
         print(
-            f"{result['label']}: "
-            f"min={result['min']:.6f}s avg={result['avg']:.6f}s "
-            f"instructions={result['instructions']}"
+            f"  最適化なし: min={no_opt['min']:.6f}s avg={no_opt['avg']:.6f}s "
+            f"instructions={no_opt['instructions']}"
+        )
+        print(
+            f"  最適化あり: min={opt['min']:.6f}s avg={opt['avg']:.6f}s "
+            f"instructions={opt['instructions']}"
+        )
+        print(
+            f"  あり/なし比: time={time_ratio:.2f}x "
+            f"instructions={instruction_ratio:.2f}x delta={instruction_delta}"
         )
     print(f"通常実行での拡張VM/BaseVM比: {overhead:.2f}x")
     print(f"例外発生/例外なしtry比: {exception_cost:.2f}x")

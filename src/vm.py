@@ -188,5 +188,5 @@ class VM(BaseVM):
         raise VMError(value)
 
 
-def run_src(src, vm_class=VM):
-    return vm_class(build(src)).run()
+def run_src(src, vm_class=VM, optimize=False):
+    return vm_class(build(src, optimize=optimize)).run()

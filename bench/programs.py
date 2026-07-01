@@ -66,3 +66,21 @@ while i < 10000:
     total = total + sum_array(arr)
     i = i + 1
 """
+
+
+CONSTANT_FOLD_ARRAY_BENCH_SRC = """
+def score_values(values):
+    i = 0
+    total = 0
+    while i < len(values):
+        total = total + values[i] + (10 * 20 + 30 * 40 - 50)
+        i = i + 1
+    return total
+
+arr = [1, 2, 3, 4, 5, 6, 7, 8]
+i = 0
+total = 0
+while i < 5000:
+    total = total + score_values(arr)
+    i = i + 1
+"""
